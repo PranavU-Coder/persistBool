@@ -1,2 +1,10 @@
+# virtual environment
 /persistence
-/data
+
+# my crumpled useless thoughts jotted down
+idea.txt
+
+# adding my affirmations and non-affirmations dictionary
+
+# stupid ass python cache
+/__pycache__
