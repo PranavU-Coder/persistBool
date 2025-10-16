@@ -7,13 +7,13 @@ class booleanPersistence:
     def __init__(self, affirmations_csv='data/affirmations.csv', non_affirmations_csv='data/non-affirmations.csv'):
         
         """
-        So we initialize the counter by loading words from CSV files
+        Initialize the counter by loading words from CSV files
         
         Args:
-            affirmations_csv: This is a path to CSV file containing affirmation words
-            non_affirmations_csv: and so this is the path to CSV file containing non-affirmation words
+            affirmations_csv: Path to the CSV file containing affirmative words
+            non_affirmations_csv: Path to the CSV file containing non-affirmative words
         """
-
+        
         aff_df = pd.read_csv(affirmations_csv)
         self.affirmation_words = set(aff_df['word'].str.lower().tolist())
         
@@ -24,46 +24,23 @@ class booleanPersistence:
         self.non_affirmation_count = 0
         self.affirmation_details = Counter()
         self.non_affirmation_details = Counter()
-        
-        print(f"Loaded {len(self.affirmation_words)} affirmation words")
-        print(f"Loaded {len(self.non_affirmation_words)} non-affirmation words")
     
-    def quick_check(self, text):
-
-        """
-        This is based on simple check solution that booleanOutputParser implements, which works in most usecases
-        However fails in scenarios where system prompt can lead to verbose output where the yes/no is properly encoded.
-        """
-        text_lower = text.lower()
-        
-        has_yes = bool(re.search(r'\byes\b', text_lower))
-        if has_yes:
-            return 'yes'
-        
-        # Check for no if yes not found
-        
-        has_no = bool(re.search(r'\bno\b', text_lower))
-        if has_no:
-            return 'no'
-        
-        return None
-
-
     def process_text(self, text):
-        """
-        Process text and count affirmation/non-affirmation words
-        """
         
-        # Always count - don't skip based on yes/no check!
+        """Process text and count affirmation/non-affirmation words"""
+        
         text_lower = text.lower()
         
-        # Separating multi-word and single-word phrases
+        # Separate multi-word and single-word phrases
+        
         multi_word_affirmations = {w for w in self.affirmation_words if len(w.split()) > 1}
         multi_word_non_affirmations = {w for w in self.non_affirmation_words if len(w.split()) > 1}
         
         single_word_affirmations = self.affirmation_words - multi_word_affirmations
         single_word_non_affirmations = self.non_affirmation_words - multi_word_non_affirmations
         
+        # Count multi-word phrases first (they are harder to do so)
+
         for phrase in multi_word_affirmations:
             if phrase in text_lower:
                 count = text_lower.count(phrase)
@@ -78,6 +55,8 @@ class booleanPersistence:
                 self.non_affirmation_details[phrase] += count
                 text_lower = text_lower.replace(phrase, ' ')
         
+        # Count single words
+
         words = re.findall(r'\b\w+\b', text_lower)
         
         for word in words:
@@ -87,19 +66,11 @@ class booleanPersistence:
             elif word in single_word_non_affirmations:
                 self.non_affirmation_count += 1
                 self.non_affirmation_details[word] += 1
-        
-        # Do quick_check AFTER counting (informational only)
-        quick_result = self.quick_check(text)
-        
-        return {
-            'quick_check': quick_result,
-            'skipped_detailed_count': False,
-            'affirmation_count': self.affirmation_count,
-            'non_affirmation_count': self.non_affirmation_count
-        }
     
     def get_counts(self):
-
+        
+        """Return current counts and detailed breakdown"""
+        
         return {
             "affirmation_total": self.affirmation_count,
             "non_affirmation_total": self.non_affirmation_count,
@@ -108,6 +79,8 @@ class booleanPersistence:
         }
     
     def reset_counters(self):
+        
+        """Reset all counters to zero"""
 
         self.affirmation_count = 0
         self.non_affirmation_count = 0
@@ -115,6 +88,9 @@ class booleanPersistence:
         self.non_affirmation_details.clear()
     
     def print_summary(self):
+        
+        """Print a human-readable summary of counts for anyone that wants to cross verify"""
+
         print(f"\nAffirmation words found: {self.affirmation_count}")
         print(f"Non-affirmation words found: {self.non_affirmation_count}")
         
@@ -127,16 +103,12 @@ class booleanPersistence:
             print("\nNon-affirmation breakdown:")
             for word, count in self.non_affirmation_details.most_common():
                 print(f"  {word}: {count}")
-
+    
     def parse(self):
         
         """
-        Parser function that compares affirmation and non-affirmation counters
-        Returns 'yes' if affirmations > non-affirmations, 'no' otherwise
-        If counts are equal, defaults to 'no' (LLM is prolly hallucinating at that point)
+        Compare affirmation and non-affirmation counters
+        Returns 'yes' if affirmations > non-affirmations, 'no' otherwise (usually the case of it being equal is super rare)
         """
 
-        if self.affirmation_count > self.non_affirmation_count:
-            return 'yes'
-        else:
-            return 'no'
+        return 'yes' if self.affirmation_count > self.non_affirmation_count else 'no'

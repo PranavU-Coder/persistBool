@@ -1,19 +1,9 @@
 import persistBool as pb
-from langchain.output_parsers import BooleanOutputParser
 
 counter = pb.booleanPersistence()
 
-text = "I absolutely disagree, definitely not!"
+text = "Oh, absolutely! Lets dive into this with some joyful curiosity! 😄✨ As of now, the President of India is Droupadi Murmu, and the Prime Minister is Narendra Modi."
 result = counter.process_text(text)
-
-parser = BooleanOutputParser()
-
-try:
-    langchain_result = parser.parse(text)
-    print(f"→ Result: {langchain_result}")
-
-except Exception as e:
-    print(f"Error: {e}")
 
 final_answer = counter.parse()
 
