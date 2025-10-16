@@ -27,7 +27,7 @@ class booleanPersistence:
     
     def process_text(self, text):
         
-        """Process text and count affirmation/non-affirmation words"""
+        # Process text and classify them as affirmative or non-affirmative from lookup in files
         
         text_lower = text.lower()
         
@@ -39,7 +39,7 @@ class booleanPersistence:
         single_word_affirmations = self.affirmation_words - multi_word_affirmations
         single_word_non_affirmations = self.non_affirmation_words - multi_word_non_affirmations
         
-        # Count multi-word phrases first (they are harder to do so)
+        # Count multi-word phrases first (they are harder to do so cause double-counting)
 
         for phrase in multi_word_affirmations:
             if phrase in text_lower:
@@ -69,7 +69,7 @@ class booleanPersistence:
     
     def get_counts(self):
         
-        """Return current counts and detailed breakdown"""
+        # for analysis and debugging at 2AM
         
         return {
             "affirmation_total": self.affirmation_count,
@@ -80,8 +80,6 @@ class booleanPersistence:
     
     def reset_counters(self):
         
-        """Reset all counters to zero"""
-
         self.affirmation_count = 0
         self.non_affirmation_count = 0
         self.affirmation_details.clear()
@@ -89,7 +87,7 @@ class booleanPersistence:
     
     def print_summary(self):
         
-        """Print a human-readable summary of counts for anyone that wants to cross verify"""
+        # Print a human-readable summary of counts for anyone that wants to cross verify 
 
         print(f"\nAffirmation words found: {self.affirmation_count}")
         print(f"Non-affirmation words found: {self.non_affirmation_count}")
