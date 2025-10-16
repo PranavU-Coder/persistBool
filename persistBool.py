@@ -109,4 +109,4 @@ class booleanPersistence:
         Returns 'yes' if affirmations > non-affirmations, 'no' otherwise (usually the case of it being equal is super rare)
         """
 
-        return 'yes' if self.affirmation_count > self.non_affirmation_count else 'no'
+        return True if self.affirmation_count > self.non_affirmation_count else False
