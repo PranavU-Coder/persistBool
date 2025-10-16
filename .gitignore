@@ -8,3 +8,6 @@ idea.txt
 
 # stupid ass python cache
 /__pycache__
+
+# removing demo files for now, will add it once I chain with other components
+/demo
