@@ -106,7 +106,7 @@ class booleanPersistence:
         
         """
         Compare affirmation and non-affirmation counters
-        Returns 'yes' if affirmations > non-affirmations, 'no' otherwise (usually the case of it being equal is super rare)
+        Returns boolean True if affirmations > non-affirmations, boolean False otherwise (usually the case of it being equal is super rare)
         """
 
         return True if self.affirmation_count > self.non_affirmation_count else False
