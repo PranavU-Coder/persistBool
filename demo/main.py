@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_ollama import ChatOllama
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import BooleanOutputParser
-
+from langchain_core.output_parsers import StrOutputParser
 
 def ask_boolean_question(user_question, system_prompt):
     
@@ -11,15 +11,16 @@ def ask_boolean_question(user_question, system_prompt):
         temperature=0.5
     )
     
-    parser = BooleanOutputParser()
+    bool_parser = BooleanOutputParser()
+    str_parser = StrOutputParser()
     
     prompt_template = PromptTemplate(
         input_variables=['query'],
         template="{system_prompt}\n\n{query}\n\n"
     )
     
-    chain = prompt_template / llm | parser
-    
+    chain = prompt_template | llm | str_parser
+        
     response = chain.invoke({
         "system_prompt": system_prompt,
         "query": user_question

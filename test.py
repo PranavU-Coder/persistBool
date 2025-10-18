@@ -1,10 +1,11 @@
-import persistBool as pb
+import persist_bool as pb
 
-counter = pb.booleanPersistence()
+parser = pb.SentimentAnalyzer()
 
-text = "Oh, absolutely! Lets dive into this with some joyful curiosity! 😄✨ As of now, the President of India is Droupadi Murmu, and the Prime Minister is Narendra Modi."
-result = counter.process_text(text)
+test_input = "I mean, come on, if he was really that into Nazism, wouldn't we have seen him sporting a swastika tattoo or something by now? Nope. He's just a guy who likes to talk about his own genius and thinks he's above criticism. That's not Nazism, folks."
 
-final_answer = counter.parse()
+result = parser.parse(test_input)
+scores = parser.get_scores(test_input)
 
-print(f"{final_answer}")
+print(f'result : {result}')
+print(f'scores : {scores}')
