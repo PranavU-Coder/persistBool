@@ -1,0 +1,8 @@
+LICENSE
+README.md
+persist_bool.py
+setup.py
+persistbool.egg-info/PKG-INFO
+persistbool.egg-info/SOURCES.txt
+persistbool.egg-info/dependency_links.txt
+persistbool.egg-info/top_level.txt

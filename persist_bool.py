@@ -1,17 +1,28 @@
+from langchain_core.output_parsers import BaseOutputParser
+
 import pandas as pd 
 import numpy as np 
-
-from transformers import AutoTokenizer
-from transformers import AutoModelForSequenceClassification
-
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
-
 import torch
 
-MODEL = f"cardiffnlp/twitter-roberta-base-sentiment"
+MODEL = "cardiffnlp/twitter-roberta-base-sentiment"
 
-class SentimentAnalyzer:
+class SentimentAnalyzer(BaseOutputParser):
+    
+    def parse(self, text: str) -> bool:
 
+        """        
+        Args:
+            text (str): LLM response text to analyze
+            
+        Returns:
+            bool: True if positive sentiment dominates, False if negative
+        """
+
+        scores = self.get_scores(text)
+        return scores['positive'] > scores['negative']
+    
     def get_scores(self, text):
         
         """
@@ -20,15 +31,10 @@ class SentimentAnalyzer:
             
         Returns:
             dict: Dictionary containing positive and negative sentiment scores
-                  {'positive': float, 'negative': float}
         """
         
-        # Loading the tokenizer and model
-
         tokenizer = AutoTokenizer.from_pretrained(MODEL)
         model = AutoModelForSequenceClassification.from_pretrained(MODEL)
-        
-        # Tokenizing and get model output
         
         encoded_input = tokenizer(text, return_tensors='pt')
         
@@ -38,8 +44,6 @@ class SentimentAnalyzer:
         scores = output.logits[0].detach().numpy()
         scores = softmax(scores)
         
-        # Default model labels: 0 = negative, 1 = neutral, 2 = positive
-        
         neg_score = float(scores[0])
         pos_score = float(scores[2])
         
@@ -47,16 +51,7 @@ class SentimentAnalyzer:
             'positive': pos_score,
             'negative': neg_score
         }
-
-    def parse(self, text):
-
-        """
-        Args:
-            text (str): Input text to analyze
-            
-        Returns:
-            bool: True if positive sentiment dominates, False if negative dominates
-        """
-        
-        scores = self.get_scores(text)
-        return scores['positive'] > scores['negative']
+    
+    @property
+    def _type(self) -> str:
+        return "sentiment_analyzer"

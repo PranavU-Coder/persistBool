@@ -1,8 +1,8 @@
 import streamlit as st
 from langchain_ollama import ChatOllama
 from langchain.prompts import PromptTemplate
-from langchain.output_parsers import BooleanOutputParser
-from langchain_core.output_parsers import StrOutputParser
+
+from persist_bool import SentimentAnalyzer
 
 def ask_boolean_question(user_question, system_prompt):
     
@@ -11,15 +11,14 @@ def ask_boolean_question(user_question, system_prompt):
         temperature=0.5
     )
     
-    bool_parser = BooleanOutputParser()
-    str_parser = StrOutputParser()
-    
+    bool_parser = SentimentAnalyzer()
+
     prompt_template = PromptTemplate(
         input_variables=['query'],
         template="{system_prompt}\n\n{query}\n\n"
     )
     
-    chain = prompt_template | llm | str_parser
+    chain = prompt_template | llm | bool_parser
         
     response = chain.invoke({
         "system_prompt": system_prompt,
@@ -29,12 +28,12 @@ def ask_boolean_question(user_question, system_prompt):
     return response
 
 
-# Streamlit UI
-st.title(" Boolean Question Assistant")
+st.title("QnA")
 
-st.markdown("Ask yes/no questions and get boolean responses from the LLM!")
+st.markdown("Ask yes/no questions")
 
 with st.sidebar:
+
     st.header("Configuration")
     
     system_prompt = st.text_area(
@@ -53,6 +52,7 @@ with st.sidebar:
     """)
 
 # Main content
+
 with st.form(key='question_form'):
     user_question = st.text_area(
         label="Ask a Yes/No Question",
@@ -64,6 +64,7 @@ with st.form(key='question_form'):
     submit_button = st.form_submit_button(label='Submit Question', type="primary")
 
 if submit_button and user_question:
+    
     with st.spinner("Thinking..."):
         try:
             response = ask_boolean_question(user_question, system_prompt)
